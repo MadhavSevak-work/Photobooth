@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Photobooth</title>
+    <link rel="stylesheet" href="main.css">
+    <!-- Retro Pixel Font & Rounded Sans Serif -->
+    <!-- Fonts for Retro, Vintage, and Sketch themes -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Varela+Round&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;700&family=Comic+Neue:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="theme-retro">
+
+    <!-- Intro Screen -->
+    <div id="intro-screen" class="intro-screen">
+        <!-- Optional film grain on intro too -->
+        <div class="film-grain"></div>
+        <div class="intro-content">
+            <h1 class="logo-title">90s BOOTH</h1>
+            <p class="subtitle">PREMIUM MALL EDITION</p>
+            <div class="coin-slot-container">
+                <button id="insert-coin-btn" class="coin-btn">INSERT COIN</button>
+            </div>
+            <p class="blink-text">PRESS TO START</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container hidden" id="app-container">
+
+        <!-- Theme Effects Layer (for backgrounds/particles) -->
+        <div id="theme-effects-layer" class="theme-effects-layer"></div>
+
+        <!-- Confetti Container for Birthday Theme -->
+        <div id="confetti-container"></div>
+
+        <!-- Film Grain Overlay -->
+        <div class="film-grain"></div>
+
+        <header class="no-print">
+            <h1>Retro Booth</h1>
+            <p class="subtitle">~ capture the vibe ~</p>
+        </header>
+
+        <main id="camera-section" class="section active">
+            <div class="controls dashboard no-print">
+                <div class="control-item">
+                    <label for="filter-select">Filter:</label>
+                    <select id="filter-select" class="dropdown">
+                        <option value="none">Normal</option>
+                        <option value="grayscale(100%)">Black & White</option>
+                        <option value="sepia(80%)">Classic Sepia</option>
+                        <option value="saturate(60%) contrast(110%) brightness(110%) sepia(20%)" selected>Washed Out 90s
+                        </option>
+                        <option value="sepia(30%) hue-rotate(180deg) saturate(120%)">Cool Blue Tint</option>
+                        <option value="contrast(130%) brightness(110%) saturate(140%) hue-rotate(-10deg)">Mall Glamour
+                        </option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label for="theme-select">Theme:</label>
+                    <select id="theme-select" class="dropdown">
+                        <option value="theme-retro" selected>Retro 90s</option>
+                        <option value="theme-vintage">Vintage Classic</option>
+                        <option value="theme-sketch">Pencil Sketch</option>
+                        <option value="theme-birthday">Birthday Party 🎂</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label for="bday-input">Birthday:</label>
+                    <input type="date" id="bday-input" class="dropdown">
+                </div>
+
+                <div class="control-item">
+                    <label for="strip-count-select">Photos:</label>
+                    <select id="strip-count-select" class="dropdown">
+                        <option value="4" selected>4 Photos (1 Strip)</option>
+                        <option value="8">8 Photos (2 Strips)</option>
+                        <option value="12">12 Photos (3 Strips)</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label for="countdown-select">Countdown:</label>
+                    <select id="countdown-select" class="dropdown">
+                        <option value="3" selected>3 Seconds</option>
+                        <option value="5">5 Seconds</option>
+                        <option value="10">10 Seconds</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label for="delay-select">Delay:</label>
+                    <select id="delay-select" class="dropdown">
+                        <option value="1">1 Second</option>
+                        <option value="2" selected>2 Seconds</option>
+                        <option value="3">3 Seconds</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Birthday Countdown Display -->
+            <div id="countdown-display" class="countdown-display hidden"></div>
+
+            <!-- The Retro Arcade Frame around the camera -->
+            <div class="arcade-cabinet no-print">
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline></video>
+                    <!-- CRT scanline effect over the video -->
+                    <div class="crt-scanlines"></div>
+                    <div id="countdown" class="countdown hidden">3</div>
+                    <div id="flash" class="flash"></div>
+
+                    <!-- Intermediate Review Overlay -->
+                    <div id="review-overlay" class="review-overlay hidden">
+                        <img id="review-img" src="" alt="Captured Photo">
+                        <div class="review-actions">
+                            <button id="retake-pic-btn" class="btn secondary-btn">RETAKE</button>
+                            <button id="go-ahead-btn" class="btn primary-btn">KEEP IT!</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar no-print">
+                <button id="capture-btn" class="btn primary-btn capture-btn">📸 START (4 PICS)</button>
+            </div>
+        </main>
+
+        <section id="result-section" class="section hidden">
+            <div class="results-layout">
+                <!-- Single vertical strip -->
+                <div id="strip-container" class="strip-container">
+                    <!-- dynamically injected strip -->
+                </div>
+
+                <div class="result-actions no-print">
+                    <button id="retake-btn" class="btn secondary-btn">↻ START OVER</button>
+                    <button id="download-btn" class="btn primary-btn">↓ SAVE STRIP</button>
+                    <button id="print-btn" class="btn secondary-btn">🖨️ PRINT</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
