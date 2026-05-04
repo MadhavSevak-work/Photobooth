@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const countdownSelect = document.getElementById('countdown-select');
     const delaySelect = document.getElementById('delay-select');
     const captureBtn = document.getElementById('capture-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
     const countdownEl = document.getElementById('countdown');
     const flashEl = document.getElementById('flash');
 
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let stream = null;
     let capturedImages = [];
     let isCapturing = false;
+    let isCancelled = false;
 
     // --- Sound Effects ---
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -287,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runCountdown(seconds) {
         countdownEl.classList.remove('hidden');
         for (let i = seconds; i > 0; i--) {
+            if (isCancelled) break;
             countdownEl.textContent = i;
             countdownEl.classList.remove('animate');
             void countdownEl.offsetWidth;
@@ -298,11 +301,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function waitForUserApproval() {
         return new Promise((resolve) => {
+            window.currentApprovalResolve = resolve;
             const handleGoAhead = () => { cleanup(); resolve(true); };
             const handleRetake = () => { cleanup(); resolve(false); };
             const cleanup = () => {
                 goAheadBtn.removeEventListener('click', handleGoAhead);
                 retakePicBtn.removeEventListener('click', handleRetake);
+                window.currentApprovalResolve = null;
                 reviewOverlay.classList.add('hidden');
             };
             goAheadBtn.addEventListener('click', handleGoAhead);
@@ -310,9 +315,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    cancelBtn.addEventListener('click', () => {
+        isCancelled = true;
+        if (window.currentApprovalResolve) {
+            window.currentApprovalResolve(false);
+            window.currentApprovalResolve = null;
+            reviewOverlay.classList.add('hidden');
+        }
+    });
+
     async function startCaptureSequence() {
         if (isCapturing) return;
         isCapturing = true;
+        isCancelled = false;
+
+        captureBtn.classList.add('hidden');
+        cancelBtn.classList.remove('hidden');
 
         captureBtn.disabled = true;
         filterSelect.disabled = true;
@@ -326,10 +344,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let photoIndex = 0;
         while (photoIndex < totalPhotos) {
-            captureBtn.innerHTML = `PHOTO ${photoIndex + 1}/${totalPhotos}`;
+            if (isCancelled) break;
+            
+            cancelBtn.innerHTML = `🛑 CANCEL (${photoIndex}/${totalPhotos})`;
 
             const timerSeconds = parseInt(photoIndex === 0 ? countdownSelect.value : delaySelect.value, 10);
             await runCountdown(timerSeconds);
+            if (isCancelled) break;
+            
             playShutterSound();
             triggerFlash();
 
@@ -346,18 +368,29 @@ document.addEventListener('DOMContentLoaded', () => {
             reviewOverlay.classList.remove('hidden');
 
             const approved = await waitForUserApproval();
+            if (isCancelled) break;
+            
             if (approved) {
                 capturedImages.push(imgData);
                 photoIndex++;
             }
         }
 
-        renderPhotoStrip();
-        showResults();
-        stopCamera();
+        if (!isCancelled && capturedImages.length > 0) {
+            renderPhotoStrip();
+            showResults();
+            stopCamera();
+        } else {
+            // Cancelled or 0 photos captured
+            capturedImages = [];
+            reviewOverlay.classList.add('hidden');
+        }
 
         isCapturing = false;
+        cancelBtn.classList.add('hidden');
+        captureBtn.classList.remove('hidden');
         captureBtn.innerHTML = `📸 START (${totalPhotos} PICS)`;
+        
         captureBtn.disabled = false;
         filterSelect.disabled = false;
         themeSelect.disabled = false;
