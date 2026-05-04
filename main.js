@@ -269,21 +269,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function captureFrame() {
+        // 1. Capture raw video to temporary canvas (mirrored)
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = video.videoWidth;
+        tempCanvas.height = video.videoHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        tempCtx.translate(tempCanvas.width, 0);
+        tempCtx.scale(-1, 1);
+        tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+
+        // 2. Draw the raw captured frame to the final canvas WITH the filter applied
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
-
-        // Mirror the image to match preview
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
 
         const filterValue = filterSelect.value;
         if (filterValue !== 'none') {
             ctx.filter = filterValue;
         }
 
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
         return canvas.toDataURL('image/png');
     }
 
