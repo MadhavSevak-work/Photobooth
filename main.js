@@ -269,28 +269,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function captureFrame() {
-        // 1. Capture raw video to temporary canvas (mirrored)
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = video.videoWidth;
-        tempCanvas.height = video.videoHeight;
-        const tempCtx = tempCanvas.getContext('2d');
-
-        tempCtx.translate(tempCanvas.width, 0);
-        tempCtx.scale(-1, 1);
-        tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-
-        // 2. Draw the raw captured frame to the final canvas WITH the filter applied
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
 
-        const filterValue = filterSelect.value;
-        if (filterValue !== 'none') {
-            ctx.filter = filterValue;
-        }
+        // Mirror the image to match preview
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
 
-        ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         return canvas.toDataURL('image/png');
     }
 
@@ -347,6 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const imgData = captureFrame();
             reviewImg.src = imgData;
+            
+            // Apply CSS filter to the review image for mobile reliability
+            if (filterSelect.value !== 'none') {
+                reviewImg.style.filter = filterSelect.value;
+            } else {
+                reviewImg.style.filter = 'none';
+            }
+            
             reviewOverlay.classList.remove('hidden');
 
             const approved = await waitForUserApproval();
@@ -388,6 +384,12 @@ document.addEventListener('DOMContentLoaded', () => {
             stripChunk.forEach(src => {
                 const img = document.createElement('img');
                 img.src = src;
+                
+                // Apply CSS filter to the result DOM images
+                if (filterSelect.value !== 'none') {
+                    img.style.filter = filterSelect.value;
+                }
+                
                 photosDiv.appendChild(img);
             });
 
@@ -471,7 +473,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const xPos = (stripIndex * stripWidth) + padding;
                 const yPos = padding + (rowIndex * (imgHeight + padding));
 
+                // Apply filter to the context for the final download
+                if (filterSelect.value !== 'none') {
+                    ctx.filter = filterSelect.value;
+                } else {
+                    ctx.filter = 'none';
+                }
+
                 ctx.drawImage(img, xPos, yPos, imgWidth, imgHeight);
+                
+                // Reset filter before drawing borders
+                ctx.filter = 'none';
+
                 // Draw thin black border around photos
                 ctx.strokeStyle = '#222';
                 ctx.lineWidth = 4;
